@@ -35,7 +35,7 @@ banking-intent-unsloth/
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/your-username/banking-intent-unsloth.git
+git clone https://github.com/juzharii/banking-intent-unsloth.git
 cd banking-intent-unsloth
 
 # 2. Install Unsloth (see https://github.com/unslothai/unsloth for your CUDA version)
