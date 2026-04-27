@@ -151,29 +151,52 @@ output:
   save_method: "merged_16bit"
 ```
 
-### 3. Hyperparameter Configuration and Rationale
+### 3. Model Configuration
 
-The following choices summarize both the values I used and why I selected them for this project.
+| Parameter           | Value                           |
+| :------------------ | :------------------------------ |
+| Base Model          | `unsloth/Llama-3.2-1B-Instruct` |
+| Max Sequence Length | 2048                            |
+| Quantization        | 4-bit                           |
 
-1. Batch size
-   I used `per_device_train_batch_size: 4` and `gradient_accumulation_steps: 4`, so the effective batch size is 16 samples per optimizer update. I chose this setup to keep memory usage manageable while still getting more stable gradient updates than a small effective batch.
+In practice, this configuration gives a good trade-off between model quality and hardware cost. I keep the context length at 2048 because each prompt includes both the user query and all intent labels, so shorter contexts can cut useful information. I also run the model in 4-bit mode to reduce VRAM usage and make experiments easier to run on limited GPUs.
 
-2. Learning rate
-   I used `learning_rate: 2e-4` with `lr_scheduler_type: "cosine"` and `warmup_steps: 50`. I chose this because `2e-4` is a practical range for LoRA fine-tuning, and warmup plus cosine decay helps avoid unstable early updates and supports smoother convergence.
+### 4. Training Hyperparameters
 
-3. Optimizer
-   I used `optim: "adamw_8bit"`. I chose 8-bit AdamW to reduce optimizer memory overhead while keeping optimization behavior close to AdamW, which is important when training large models on limited hardware.
+| Setting(s)                  | Value        |
+| :-------------------------- | :----------- |
+| Batch Size (per device)     | `4`          |
+| Gradient Accumulation Steps | `4`          |
+| Effective Batch Size        | `16`         |
+| Learning Rate               | `2e-4`       |
+| Learning Rate Scheduler     | `cosine`     |
+| Warmup Steps                | `50`         |
+| Optimizer                   | `adamw_8bit` |
+| Epochs                      | `1`          |
+| Weight Decay                | `0.001`      |
+| Max Input Characters        | `1500`       |
+| Seed                        | `3407`       |
+| Checkpoint Strategy         | `steps`      |
+| Save Every N Steps          | `100`        |
+| Max Saved Checkpoints       | `3`          |
 
-4. Number of training steps or epochs
-   I trained for `num_train_epochs: 1`, and saved checkpoints with `save_strategy: "steps"`, `save_steps: 100`, `save_total_limit: 3`. I chose one epoch as a strong baseline to control training time and reduce overfitting risk, while periodic checkpoints make it easy to resume or compare intermediate states.
+These hyperparameters are stable enough to train, but still fast to iterate. The effective batch size of 16 helps reduce noisy updates, and a learning rate of 2e-4 with cosine scheduling plus warmup makes optimization smoother at the beginning of training. Weight decay is used as lightweight regularization, and frequent checkpoints help recover training.
 
-5. Maximum sequence length
-   I set `max_seq_length: 2048`. I chose this because each input prompt contains both the user query and the full list of 77 intent classes, so a longer context window helps avoid truncating useful prompt information.
+### 5. LoRA Settings
 
-6. Regularization or augmentation techniques
-   I used `weight_decay: 0.001` and LoRA settings `r: 16`, `lora_alpha: 32`, `lora_dropout: 0`. I did not apply explicit data augmentation. Instead, I controlled input quality with text normalization and `max_input_chars: 1500` truncation. This keeps training simple and reproducible while still limiting noise from very long or inconsistent inputs.
+| LoRA Parameter         | Value                                                                                  |
+| :--------------------- | :------------------------------------------------------------------------------------- |
+| Rank (`r`)             | `16`                                                                                   |
+| Alpha                  | `32`                                                                                   |
+| Dropout                | `0`                                                                                    |
+| Bias                   | `none`                                                                                 |
+| Gradient Checkpointing | `unsloth`                                                                              |
+| RSLoRA                 | `false`                                                                                |
+| Target Modules         | `lm_head`, `q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj`, `down_proj` |
 
-### 4. Run training
+For LoRA, I focus on keeping the trainable parameter count low while still adapting the most important attention and feed-forward modules. I keep dropout at 0 in this baseline to avoid adding extra instability in short runs, and I enable Unsloth gradient checkpointing to save memory.
+
+### 6. Run training
 
 ```bash
 bash train.sh
@@ -181,7 +204,7 @@ bash train.sh
 bash train.sh configs/train.yaml
 ```
 
-Training will:
+During training, the pipeline does the following:
 
 1. Load `Llama-3.2-1B-Instruct` and prune `lm_head` from 128 256 → 77 tokens
 2. Apply LoRA adapters
@@ -190,25 +213,7 @@ Training will:
 5. Train with `transformers.Trainer`
 6. Save the **fully merged 16-bit model** to `model_finetuned/`
 
-### 5. Upload to Hugging Face
-
-```bash
-huggingface-cli upload your-username/banking-intent-llama3 model_finetuned/ .
-```
-
-Or via Python:
-
-```python
-from huggingface_hub import HfApi
-api = HfApi()
-api.upload_folder(
-  folder_path="model_finetuned",
-    repo_id="your-username/banking-intent-llama3",
-    repo_type="model",
-)
-```
-
-### 6. Update `configs/inference.yaml` and run inference
+### 7. Update `configs/inference.yaml` and run inference
 
 ```yaml
 model:
