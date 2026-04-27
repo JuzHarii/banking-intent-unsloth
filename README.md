@@ -32,6 +32,7 @@ banking-intent-unsloth/
 ├── train.sh                  # Shell wrapper for train.py
 ├── inference.sh              # Shell wrapper for inference.py
 ├── requirements.txt
+├── train_notebook.ipynb
 └── README.md
 ```
 
