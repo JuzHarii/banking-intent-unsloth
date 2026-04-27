@@ -7,6 +7,10 @@ This project fine-tunes **Llama-3.2-1B-Instruct** for banking intent classificat
 ## Demonstration Video
 https://drive.google.com/file/d/155NfwXq24ju4GurYDxf-exAbTRqwKERH/view?usp=sharing
 
+## Colab Notebook
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1MHOTgPw9EL7F1270b_2PwcLA682O8a1R)
+*(Use this link for quick access without downloading the codebase)*
+
 ## Repository Structure
 
 ```
