@@ -1,6 +1,6 @@
 # Banking Intent Classifier — Llama 3.2 + Unsloth
 
-Fine-tuned **Llama-3.2-1B-Instruct** for banking intent classification across **77 classes**, using LoRA (via [Unsloth](https://github.com/unslothai/unsloth)) and a custom logit-based inference strategy.
+This project fine-tunes **Llama-3.2-1B-Instruct** for banking intent classification across **77 classes**, using LoRA (via [Unsloth](https://github.com/unslothai/unsloth)) and a custom logit-based inference strategy for fast, deterministic predictions.
 
 ---
 
