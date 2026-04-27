@@ -259,3 +259,51 @@ training:
 Then rerun `bash train.sh`.
 
 ---
+## Notebook Training Quick Start (Colab)
+
+If you want to train from the provided notebook, follow the same path pattern used in train_notebook.ipynb.
+
+1. Mount Google Drive
+
+```python
+from google.colab import drive
+drive.mount("/content/drive")
+```
+
+2. Create Drive folders used by the notebook
+
+```bash
+!mkdir -p /content/drive/MyDrive/Projects/Assignment_02/data_raw
+!mkdir -p /content/drive/MyDrive/Projects/Assignment_02/outputs
+```
+
+3. Put your data files in data_raw or define custom paths
+Default file locations expected by the notebook:
+```
+/content/drive/MyDrive/Projects/Assignment_02/data_raw/categories.json
+/content/drive/MyDrive/Projects/Assignment_02/data_raw/train.csv
+/content/drive/MyDrive/Projects/Assignment_02/data_raw/test.csv
+```
+If you use different locations, update these variables in the global variables cell:
+```
+CATEGORIES_PATH
+TRAIN_DATASET_PATH
+TEST_DATASET_PATH
+```
+4. Set output path used by TrainingArguments
+Default output path:
+```
+/content/drive/MyDrive/Projects/Assignment_02/outputs
+```
+If needed, change OUTPUT_PATH in the training cell.
+
+5. Run training from notebook cells
+
+```bash
+# Open train_notebook.ipynb in Colab, then run cells from top to bottom.
+# The notebook handles preprocessing, training, and exporting model artifacts.
+```
+
+This keeps datasets and checkpoints in Drive, so progress is preserved if the runtime reconnects.
+
+---
