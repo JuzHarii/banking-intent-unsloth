@@ -1,0 +1,52 @@
+model:
+  name: "unsloth/Llama-3.2-1B-Instruct"
+  max_seq_length: 2048
+  dtype: null
+  load_in_4bit: true
+  num_classes: 77
+
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0
+  bias: "none"
+  use_gradient_checkpointing: "unsloth"
+  random_state: 3407
+  use_rslora: false
+  target_modules:
+    - lm_head
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+data:
+  train_path: "sample_data/train.csv"
+  categories_path: "sample_data/categories.json"
+  label_mapping_path: "configs/label_mapping.json"
+  max_input_chars: 1500
+
+training:
+  output_dir: "outputs"
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 2e-4
+  warmup_steps: 50
+  num_train_epochs: 1
+  logging_steps: 10
+  optim: "adamw_8bit"
+  weight_decay: 0.001
+  lr_scheduler_type: "cosine"
+  seed: 3407
+  save_strategy: "steps"
+  save_steps: 100
+  save_total_limit: 3
+  report_to: "none"
+  resume_from_checkpoint: null # set to checkpoint path to resume
+
+output:
+  merged_model_dir: "model_finetuned"
+  save_method: "merged_16bit"

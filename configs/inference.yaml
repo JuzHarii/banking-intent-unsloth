@@ -1,0 +1,14 @@
+model:
+  hf_repo: "juzharii/banking-intent-llama-3.2"
+  max_seq_length: 2048
+  dtype: null
+  load_in_4bit: true
+  num_classes: 77
+
+data:
+  test_path: "sample_data/test.csv"
+  label_mapping_path: "configs/label_mapping.json"
+  max_input_chars: 1500
+
+evaluation:
+  output_report_path: "outputs/eval_report.txt"
