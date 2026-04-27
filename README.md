@@ -1,6 +1,6 @@
 # Banking Intent Classifier — Llama 3.2 + Unsloth
 
-Fine-tuned **Llama-3.2-1B-Instruct** for banking intent classification across **77 classes**, using LoRA (via [Unsloth](https://github.com/unslothai/unsloth)) and a custom logit-based inference strategy (no `model.generate()`).
+Fine-tuned **Llama-3.2-1B-Instruct** for banking intent classification across **77 classes**, using LoRA (via [Unsloth](https://github.com/unslothai/unsloth)) and a custom logit-based inference strategy.
 
 ---
 
@@ -187,7 +187,7 @@ Training will:
 2. Apply LoRA adapters
 3. Tokenize your data with a banking prompt template
 4. Run a sanity check to verify labels are in range `[0, 76]`
-5. Train with `transformers.Trainer` (not SFTTrainer)
+5. Train with `transformers.Trainer`
 6. Save the **fully merged 16-bit model** to `model_finetuned/`
 
 ### 5. Upload to Hugging Face
@@ -246,12 +246,3 @@ training:
 Then rerun `bash train.sh`.
 
 ---
-
-## Key Design Decisions
-
-| Decision                           | Reason                                                                                                                                      |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Trainer` instead of `SFTTrainer`  | `SFTTrainer` applies its own internal label masking that conflicts with the custom `DataCollatorForLastTokenLM`, corrupting training labels |
-| `lm_head` pruned to 77 before LoRA | Forces the model to output exactly 77 logits, one per intent class, with no wasted capacity                                                 |
-| `merged_16bit` save                | Merges LoRA into base weights so inference needs no PEFT/adapter loading — clean and portable                                               |
-| Logit argmax, not `generate()`     | Classification tasks need a single discrete output; argmax on logits is faster and more accurate than text generation for this use case     |
